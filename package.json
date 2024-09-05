@@ -1,0 +1,56 @@
+{
+  "name": "aws-workshop-0-hls-streaming",
+  "version": "1.0.0",
+  "description": "FCJ 2024 Workshop 0",
+  "main": "src/server.ts",
+  "scripts": {
+    "start": "node -r ./tsconfig-paths-bootstrap.js build/server.js",
+    "dev": "nodemon -r ./tsconfig-paths-bootstrap.js build/server.js",
+    "build": "webpack --config webpack.config.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdthinh1012/aws-workshop-0-hls-streaming.git"
+  },
+  "keywords": [
+    "fcj",
+    "aws",
+    "hls",
+    "video",
+    "streaming",
+    "typescript",
+    "express",
+    "react"
+  ],
+  "author": "hdthinh1012",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hdthinh1012/aws-workshop-0-hls-streaming/issues"
+  },
+  "homepage": "https://github.com/hdthinh1012/aws-workshop-0-hls-streaming#readme",
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.637.0",
+    "@aws-sdk/client-secrets-manager": "^3.637.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
+    "nodemon": "^3.1.4",
+    "ts-loader": "^4.1.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "typescript": "^5.5.4",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "json5": "^2.2.3",
+    "multer": "^1.4.5-lts.1"
+  }
+}
