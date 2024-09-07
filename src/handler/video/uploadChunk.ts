@@ -3,14 +3,6 @@ import fs from 'fs';
 import e, { Request, Response } from 'express';
 import { Low } from 'lowdb/lib';
 
-/**
- * Global map to manage different files upload chunks
- * <name> : <array of boolean>
- */
-const uploadingChunksDatabase: {
-    [key: string]: boolean[]
-} = {};
-
 const uploadPath = './uploads/videos';
 const uploadPathChunks = './uploads/tmp/fcj-workshop-0';
 
@@ -125,6 +117,16 @@ export const uploadChunk = async (req, res) => {
                 throw `PartNo out of range for filename ${fileName}`;
             } else {
                 await db.update((data) => data[fileName][partNo] = true);
+
+                /**
+                 * Check is last chunk
+                 */
+                const uploadChunksState = db.data[fileName];
+                const isFinish = (uploadChunksState.length > 0) && (uploadChunksState.filter((chunkState: boolean) => chunkState == false).length == 0);
+                if (isFinish) {
+                    await FileUtils.mergeChunks(db, fileName);
+                }
+
                 res.send({
                     partNo: partNo,
                     fileName: fileName,
@@ -139,7 +141,62 @@ export const uploadChunk = async (req, res) => {
         res.status(400).send({ error, success: false });
     }
 }
-d
+
+class FileUtils {
+    public static async mergeChunks(db: Low<{}>, fileName): Promise<void> {
+        const MAX_RETRIES = 5;
+        const RETRY_DELAY = 1000; // 1 second
+        const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        /**
+         * Open file stream, adding chunks into file by command:
+         * chunkStream.pipe(writeStream, {end: false})
+         */
+
+        const finalFilePath = `${uploadPath}/${fileName}`;
+        const writeStream = fs.createWriteStream(finalFilePath);
+
+        const uploadChunksState = db.data[fileName];
+        for (let i = 0; i < uploadChunksState.length; i++) {
+            const chunkName = `${fileName}.part_${i}`;
+
+            let retries = 0;
+            while (retries < MAX_RETRIES) {
+                try {
+                    const chunkPath = `${uploadPathChunks}/${chunkName}`;
+                    console.log('finalFilePath:', finalFilePath);
+                    console.log('chunkPath:', chunkPath);
+                    const readStream = fs.createReadStream(chunkPath);
+                    await new Promise<void>((resolve, reject) => {
+                        readStream.pipe(writeStream, { end: true });
+                        readStream.on('data', () => {
+                            console.log('Merging chunk');
+                        })
+                        readStream.on('end', () => {
+                            // Delete the chunk file after it has been appended to the final file
+                            console.log('Write chunk end');
+                            fs.unlinkSync(chunkPath);
+                            resolve();
+                        });
+                        readStream.on('error', (err) => {
+                            console.error(`Error reading chunk ${chunkName}:`, err);
+                            reject(err);
+                        })
+                    });
+                    break;
+                } catch (error) {
+                    console.error(`Failed at ${retries} effort for ${chunkName}. Retrying...`);
+                    retries += 1;
+                    if (retries < MAX_RETRIES) {
+                        await delay(RETRY_DELAY);
+                    } else {
+                        console.error(`Failed to process chunk ${chunkName} after ${retries} retries.`);
+                    }
+                }
+            }
+        }
+    }
+}
+
 class FilenameUtils {
     public static getBaseName(baseFileName: string): string {
         try {
@@ -162,7 +219,6 @@ class FilenameUtils {
              * match[0]: full result
              * match[1]: in the (...)
              */
-            console.log('match:', match);
             if (match && match[1]) {
                 return parseInt(match[1], 10);
             }

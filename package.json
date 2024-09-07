@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node -r ./tsconfig-paths-bootstrap.js build/server.js",
     "dev": "nodemon -r ./tsconfig-paths-bootstrap.js build/server.js",
+    "dev:ts": "nodemon",
     "build": "webpack --config webpack.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
