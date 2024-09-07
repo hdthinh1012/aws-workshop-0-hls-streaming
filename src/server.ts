@@ -8,6 +8,8 @@ import apiRouter from './routes/api';
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false })) // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()) // parse application/json
+app.use(bodyParser.text())
+app.use(bodyParser.raw())
 
 // Enable CORS
 app.use(cors());
