@@ -6,7 +6,6 @@ module.exports = {
     entry: {
         app: './src/server.ts',
     },
-    watch: true,
     target: 'node',
     module: {
         rules: [
@@ -24,6 +23,7 @@ module.exports = {
             new TsconfigPathsPlugin({ configFile: './tsconfig.json' })
         ]
     },
+    watch: true,
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
     ],

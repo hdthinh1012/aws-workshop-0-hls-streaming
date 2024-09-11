@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { Low } from 'lowdb/lib';
 
-import { FileUtils, FilenameUtils, uploadPath, uploadPathChunks } from 'service/video/fileUtils';
+import { FileUtils, uploadPath, uploadPathChunks } from 'service/video/fileUtils';
+import { FilenameUtils } from 'service/video/filenameUtils';
 import { chunkSize } from 'service/fileSystem/multer';
 import fs from "fs";
 

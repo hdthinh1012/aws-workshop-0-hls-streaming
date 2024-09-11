@@ -2,7 +2,8 @@ import multer from 'multer';
 import fs from 'fs';
 import { Low } from 'lowdb/lib';
 
-import { uploadPathChunks, FilenameUtils } from 'service/video/fileUtils';
+import { uploadPathChunks } from 'service/video/fileUtils';
+import { FilenameUtils } from 'service/video/filenameUtils';
 
 export const chunkSize = 4 * 1024 * 1024; // 4MiB chunk size
 

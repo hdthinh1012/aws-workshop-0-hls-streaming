@@ -10,6 +10,8 @@ app.use(bodyParser.urlencoded({ extended: false })) // parse application/x-www-f
 app.use(bodyParser.json()) // parse application/json
 app.use(bodyParser.text())
 app.use(bodyParser.raw())
+import { uploadPath } from "service/video/fileUtils";
+app.use('/static', express.static(uploadPath))
 
 // Enable CORS
 app.use(cors());
