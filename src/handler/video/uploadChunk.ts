@@ -4,6 +4,7 @@ import { Low } from 'lowdb/lib';
 import { FileUtils, uploadPath, uploadPathChunks } from 'service/video/fileUtils';
 import { FilenameUtils } from 'service/video/filenameUtils';
 import { chunkSize } from 'service/fileSystem/multer';
+import { VideoProcessUtils } from 'service/video/videoProcessUtils';
 import fs from "fs";
 
 

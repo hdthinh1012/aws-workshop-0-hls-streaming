@@ -2,8 +2,8 @@ import fs from 'fs';
 import { Low } from 'lowdb/lib';
 import path from 'path';
 
-export const uploadPath = 'uploads/videos';
-export const uploadPathChunks = 'uploads/tmp';
+export const uploadPath = path.resolve(__dirname, '..', 'uploads/videos');
+export const uploadPathChunks = path.resolve(__dirname, '..', 'uploads/tmp');
 
 export class FileUtils {
     public static async mergeChunks(db: Low<{}>, fileName: string, chunkSum: number | undefined): Promise<void> {
