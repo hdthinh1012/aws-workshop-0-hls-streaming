@@ -4,8 +4,9 @@ import { Low } from 'lowdb/lib';
 import { FileUtils, uploadPath, uploadPathChunks } from 'service/video/fileUtils';
 import { FilenameUtils } from 'service/video/filenameUtils';
 import { chunkSize } from 'service/fileSystem/multer';
-import { VideoProcessUtils } from 'service/video/videoProcessUtils';
+import { streamPath, VideoProcessUtils } from 'service/video/videoProcessUtils';
 import fs from "fs";
+import { EncodeUtils } from 'service/video/encodeUtils';
 
 
 export const uploadState = async (req: Request, res: Response) => {
@@ -85,6 +86,7 @@ export const uploadChunk = async (req, res) => {
                      * True code
                      */
                     await FileUtils.mergeChunks(db, fileName, undefined);
+                    await VideoProcessUtils.generateMasterPlaylist(fileName);
                     /**
                      * Mock test response failed on last part to test cancelling upload
                      */
@@ -182,9 +184,15 @@ export const cleanAll = async (req: Request, res: Response) => {
         for (let chunk of chunks) {
             fs.rmSync(`${uploadPathChunks}/${chunk}`);
         }
-        const videos = fs.readdirSync(uploadPath);
-        for (let video of videos) {
+        const uploadVideos = fs.readdirSync(uploadPath);
+        for (let video of uploadVideos) {
             fs.rmSync(`${uploadPath}/${video}`);
+        }
+        const streamVideos = fs.readdirSync(streamPath);
+        for (let video of streamVideos) {
+            fs.rmSync(`${uploadPath}/${video}`, {
+                recursive: true
+            });
         }
         res.send({
             success: true
