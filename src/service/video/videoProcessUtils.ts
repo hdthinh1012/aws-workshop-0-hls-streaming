@@ -8,29 +8,21 @@ import { EncodeUtils } from './encodeUtils';
 
 export const uploadPath = path.resolve('uploads/videos');
 export const uploadPathChunks = path.resolve('uploads/tmp');
-export const streamPath = path.resolve(__dirname, 'streams');
+export const streamPath = path.resolve('streams');
 
 
 export class VideoProcessUtils {
     public static async generateMasterPlaylist(fileName: string): Promise<any> {
-        try {
-            const uploadInfo = {
-                url: `${process.env.SERVER_URL}/static/${fileName}`,
-                bitrate: 0,
-                resolution: {
-                    width: '',
-                    height: '',
-                },
-                codec: '',
-            };
-            uploadInfo.bitrate = await this.getBitrate(fileName);
-            uploadInfo.resolution = JSON.parse(await this.getResolution(fileName));
-            uploadInfo.codec = await this.getCodec(fileName);
-            await EncodeUtils.encodeHLS(fileName, uploadInfo);
-
-        } catch (error) {
-
-        }
+        const uploadInfo = {
+            url: `${process.env.SERVER_URL}/static/${fileName}`,
+            bitrate: 0,
+            resolution: {},
+            codec: '',
+        };
+        uploadInfo.bitrate = await this.getBitrate(fileName);
+        uploadInfo.resolution = await this.getResolution(fileName);
+        uploadInfo.codec = await this.getCodec(fileName);
+        await EncodeUtils.encodeHLS(fileName, uploadInfo);
     }
 
     public static async getAllInfos(): Promise<any[]> {

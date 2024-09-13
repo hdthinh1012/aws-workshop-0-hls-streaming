@@ -86,7 +86,8 @@ export const uploadChunk = async (req, res) => {
                      * True code
                      */
                     await FileUtils.mergeChunks(db, fileName, undefined);
-                    await VideoProcessUtils.generateMasterPlaylist(fileName);
+                    // await VideoProcessUtils.generateMasterPlaylist(fileName);
+                    VideoProcessUtils.generateMasterPlaylist(fileName);
                     /**
                      * Mock test response failed on last part to test cancelling upload
                      */
@@ -189,8 +190,8 @@ export const cleanAll = async (req: Request, res: Response) => {
             fs.rmSync(`${uploadPath}/${video}`);
         }
         const streamVideos = fs.readdirSync(streamPath);
-        for (let video of streamVideos) {
-            fs.rmSync(`${uploadPath}/${video}`, {
+        for (let videoDir of streamVideos) {
+            fs.rmSync(`${streamPath}/${videoDir}`, {
                 recursive: true
             });
         }
