@@ -1,20 +1,22 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express, { Request, Response } from 'express';
-import cors from 'cors';
+const app = express();
+
 import bodyParser from 'body-parser';
 import apiRouter from './routes/api';
-
-const app = express();
+import cors from 'cors';
+// Enable CORS
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false })) // parse application/x-www-form-urlencoded
 app.use(bodyParser.json()) // parse application/json
 app.use(bodyParser.text())
 app.use(bodyParser.raw())
-import { uploadPath } from "service/video/fileUtils";
-app.use('/static', express.static(uploadPath))
+import { uploadPath, streamPath } from "service/video/fileUtils";
 
-// Enable CORS
-app.use(cors());
+app.use('/static/hls', express.static(streamPath));
+app.use('/static', express.static(uploadPath));
+
 
 // Define a route
 app.use('/api', apiRouter);

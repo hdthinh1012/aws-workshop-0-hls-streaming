@@ -4,6 +4,7 @@ import path from 'path';
 
 export const uploadPath = path.resolve(__dirname, '..', 'uploads/videos');
 export const uploadPathChunks = path.resolve(__dirname, '..', 'uploads/tmp');
+export const streamPath = path.resolve('streams');
 
 export class FileUtils {
     public static async mergeChunks(db: Low<{}>, fileName: string, chunkSum: number | undefined): Promise<void> {
