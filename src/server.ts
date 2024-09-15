@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 dotenv.config();
 import express, { Request, Response } from 'express';
 import cors from 'cors';
@@ -26,9 +26,6 @@ app.get('/', (req: Request, res: Response) => {
 // Start the server
 const port = process.env.PORT || 3000;
 
-var server = require('http').createServer(app);
-server.keepAliveTimeout = 0; // This is a workaround for WSL v2 issues
-
-server.listen(port, () => {
+app.listen(port, () => {
     console.log(`Server is running on http://0.0.0.0:${port}`);
 });

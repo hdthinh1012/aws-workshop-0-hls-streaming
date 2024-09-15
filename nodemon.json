@@ -6,5 +6,5 @@
         "uploads"
     ],
     "ext": "js,ts,json",
-    "exec": "node -r tsconfig-paths/register -r ts-node/register ./src/server.ts"
+    "exec": "node -r ./tsconfig-paths-bootstrap.js build/server.js"
 }
