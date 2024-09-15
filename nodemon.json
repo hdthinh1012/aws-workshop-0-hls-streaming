@@ -5,5 +5,6 @@
     "ignore": [
         "uploads"
     ],
-    "ext": "js,ts,json"
+    "ext": "js,ts,json",
+    "exec": "node -r tsconfig-paths/register -r ts-node/register ./src/server.ts"
 }

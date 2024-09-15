@@ -16,13 +16,13 @@ module.exports = {
             },
         ],
     },
-    mode: "development",
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
         plugins: [
             new TsconfigPathsPlugin({ configFile: './tsconfig.json' })
         ]
     },
+    mode: "development",
     watch: true,
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
