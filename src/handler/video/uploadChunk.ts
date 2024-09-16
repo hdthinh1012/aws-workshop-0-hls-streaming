@@ -1,49 +1,11 @@
 import { Request, Response } from 'express';
 import { Low } from 'lowdb/lib';
 
-import { FileUtils, uploadPath, uploadPathChunks } from 'service/video/fileUtils';
+import { LocalFileSystemPath, uploadPath, uploadPathChunks } from 'service/fileSystem/localFileSystemPath';
+import { UploadUtils } from 'service/video/uploadUtils';
 import { FilenameUtils } from 'service/video/filenameUtils';
-import { chunkSize } from 'service/fileSystem/multer';
-import { streamPath, VideoProcessUtils } from 'service/video/videoProcessUtils';
-import fs from "fs";
-import { EncodeUtils } from 'service/video/encodeUtils';
-
-
-export const uploadState = async (req: Request, res: Response) => {
-    try {
-        const dbModule = await import('service/database/lowdb');
-        const db: Low<{}> = await dbModule.default;
-        res.send({
-            db: db.data
-        })
-    } catch (error) {
-        console.error(error);
-        res.status(400).send({ error, success: false });
-    }
-};
-
-export const uploadSetup = async (req: Request, res: Response) => {
-    try {
-        const { baseFileName, fileSize } = req.body;
-        const chunkSum = Math.ceil(fileSize / chunkSize);
-
-        const dbModule = await import('service/database/lowdb');
-        const db: Low<{}> = await dbModule.default;
-        if (baseFileName in db.data) {
-            throw 'Filename exist!';
-        } else {
-            await db.update((data) => data[baseFileName] = new Array(chunkSum).fill(false));
-            res.send({
-                success: true,
-                chunkSum: chunkSum,
-                chunkSize: chunkSize
-            });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(400).send({ error, success: false });
-    }
-}
+import { VideoProcessUtils } from 'service/video/videoProcessUtils';
+import { LocalFileSystemAction } from 'service/fileSystem/localFileSystemAction';
 
 /**
  * This is run right after Multer process upcoming chunk and store into tmp directory
@@ -52,7 +14,6 @@ export const uploadSetup = async (req: Request, res: Response) => {
  */
 export const uploadChunk = async (req, res) => {
     try {
-        const { name, user, chunkSum, chunkNo } = req.body;
         if (req.file) {
             const dbModule = await import('service/database/lowdb');
             const db: Low<{}> = await dbModule.default;
@@ -85,8 +46,7 @@ export const uploadChunk = async (req, res) => {
                     /**
                      * True code
                      */
-                    await FileUtils.mergeChunks(db, fileName, undefined);
-                    // await VideoProcessUtils.generateMasterPlaylist(fileName);
+                    await UploadUtils.mergeChunks(db, fileName, undefined);
                     VideoProcessUtils.generateMasterPlaylist(fileName);
                     /**
                      * Mock test response failed on last part to test cancelling upload
@@ -112,11 +72,10 @@ export const uploadChunk = async (req, res) => {
 export const uploadCancelling = async (req: Request, res: Response) => {
     try {
         const { baseFileName } = req.body;
-        console.log('uploadCancelling baseFileName', baseFileName);
         const dbModule = await import('service/database/lowdb');
         const db: Low<{}> = await dbModule.default;
         await db.update((data) => delete data[baseFileName]);
-        FileUtils.cleanChunks(baseFileName);
+        UploadUtils.cleanChunks(baseFileName);
         res.send({
             success: true,
             baseFileName: baseFileName
@@ -135,7 +94,7 @@ export const splitChunks = async (req: Request, res: Response) => {
         const db: Low<{}> = await dbModule.default;
         const baseFileName = fileName.replace(/\s+/g, '');
         if (baseFileName in db.data) {
-            await FileUtils.splitIntoChunks(fileName, chunkSum);
+            await UploadUtils.splitIntoChunks(fileName, chunkSum);
             res.send({
                 fileName: fileName,
                 success: true,
@@ -157,7 +116,7 @@ export const mergeChunks = async (req: Request, res: Response) => {
         const db: Low<{}> = await dbModule.default;
         const baseFileName = fileName.replace(/\s+/g, '');
         if (baseFileName in db.data) {
-            await FileUtils.mergeChunks(db, baseFileName, chunkSum);
+            await UploadUtils.mergeChunks(db, baseFileName, chunkSum);
             res.send({
                 fileName: fileName,
                 success: true,
@@ -181,19 +140,17 @@ export const cleanAll = async (req: Request, res: Response) => {
                 delete data[key];
             }
         });
-        const chunks = fs.readdirSync(uploadPathChunks);
+        const chunks = LocalFileSystemAction.readFormDir(LocalFileSystemPath.uploadChunkDirectoryPath(), undefined);
         for (let chunk of chunks) {
-            fs.rmSync(`${uploadPathChunks}/${chunk}`);
+            LocalFileSystemAction.rmDirectory(LocalFileSystemPath.uploadChunkFilePath(chunk), {});
         }
-        const uploadVideos = fs.readdirSync(uploadPath);
+        const uploadVideos = LocalFileSystemAction.readFormDir(LocalFileSystemPath.uploadVideoDirectoryPath(), undefined);
         for (let video of uploadVideos) {
-            fs.rmSync(`${uploadPath}/${video}`);
+            LocalFileSystemAction.rmDirectory(LocalFileSystemPath.uploadVideoFilePath(video), {});
         }
-        const streamVideos = fs.readdirSync(streamPath);
+        const streamVideos = LocalFileSystemAction.readFormDir(LocalFileSystemPath.streamDirectoryPath(), undefined);
         for (let videoDir of streamVideos) {
-            fs.rmSync(`${streamPath}/${videoDir}`, {
-                recursive: true
-            });
+            LocalFileSystemAction.rmDirectory(LocalFileSystemPath.streamVideoMasterPlaylistDirectoryPath(videoDir), { recursive: true });
         }
         res.send({
             success: true

@@ -2,7 +2,7 @@ import multer from 'multer';
 import fs from 'fs';
 import { Low } from 'lowdb/lib';
 
-import { uploadPathChunks } from 'service/video/fileUtils';
+import { uploadPathChunks } from 'service/fileSystem/localFileSystemPath';
 import { FilenameUtils } from 'service/video/filenameUtils';
 
 export const chunkSize = 4 * 1024 * 1024; // 4MiB chunk size
@@ -12,7 +12,7 @@ export const chunkSize = 4 * 1024 * 1024; // 4MiB chunk size
  */
 const storage = multer.diskStorage({
     destination: function (req, file, cb: Function) {
-        fs.mkdirSync(uploadPathChunks, { recursive: true })
+        fs.mkdirSync(uploadPathChunks, { recursive: true }) // TODO: Convert to S3
         cb(null, uploadPathChunks);
     },
     filename: function (req, file, cb: Function) {

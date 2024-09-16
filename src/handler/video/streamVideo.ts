@@ -1,14 +1,10 @@
 import { Request, Response } from 'express';
-import { Low } from 'lowdb/lib';
-
-import { FileUtils, streamPath, uploadPath, uploadPathChunks } from 'service/video/fileUtils';
-import { FilenameUtils } from 'service/video/filenameUtils';
-import { chunkSize } from 'service/fileSystem/multer';
-import fs from "fs";
+import { streamPath } from 'service/fileSystem/localFileSystemPath';
+import { LocalFileSystemAction } from 'service/fileSystem/localFileSystemAction';
 
 export const streamList = async (req: Request, res: Response) => {
     try {
-        const videos = fs.readdirSync(streamPath);
+        const videos = LocalFileSystemAction.readFormDir(streamPath, undefined);
         res.send({
             streamList: videos
         });
