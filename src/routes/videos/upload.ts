@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { upload } from 'service/multer/multer';
-import { uploadChunk, uploadCancelling, cleanAll } from 'handler/video/uploadChunk';
+import { uploadChunk, uploadCancelling, cleanAll, uploadSetup } from 'handler/video/uploadChunk';
 
 const videoRouter = Router();
+
+videoRouter.post('/set-up', upload.none(), uploadSetup);
 
 /**
  * Upload part api

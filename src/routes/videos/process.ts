@@ -1,7 +1,6 @@
 import { Router, Request, Response } from 'express';
 import fs from "fs";
 import { processVideo, getAllUploadInfo } from 'handler/video/processVideo';
-import { uploadPath } from 'service/fileSystem/localFileSystemPath';
 const processRouter = Router();
 
 processRouter.get('/get-all', getAllUploadInfo);

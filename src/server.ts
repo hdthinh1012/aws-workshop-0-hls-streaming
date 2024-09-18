@@ -12,11 +12,10 @@ app.use(bodyParser.urlencoded({ extended: false })) // parse application/x-www-f
 app.use(bodyParser.json()) // parse application/json
 app.use(bodyParser.text())
 app.use(bodyParser.raw())
-import { uploadPath, streamPath } from "service/fileSystem/localFileSystemPath";
 
-app.use('/static/hls', express.static(streamPath));
-app.use('/static', express.static(uploadPath));
-
+import { FileSystemPathType } from 'initFs';
+app.use('/static/hls', express.static(FileSystemPathType.streamPath));
+app.use('/static', express.static(FileSystemPathType.uploadPath));
 
 // Define a route
 app.use('/api', apiRouter);

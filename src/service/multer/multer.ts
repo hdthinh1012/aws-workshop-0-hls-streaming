@@ -1,19 +1,21 @@
 import multer from 'multer';
 import fs from 'fs';
 import { Low } from 'lowdb/lib';
-
-import { uploadPathChunks } from 'service/fileSystem/localFileSystemPath';
+import dotenv from 'dotenv';
+dotenv.config();
+import { FileSystemPathType, FileSystemActionType } from 'initFs';
 import { FilenameUtils } from 'service/video/filenameUtils';
+import { AWSS3CustomStorageEngine } from './awsS3CustomEngine';
 
-export const chunkSize = 4 * 1024 * 1024; // 4MiB chunk size
+export const chunkSize = 8 * 1024 * 1024; // 8MiB chunk size
 
 /**
  * Middleware
  */
-const storage = multer.diskStorage({
+const storage = (process.env.IS_AWS_S3 !== '1') ? multer.diskStorage({
     destination: function (req, file, cb: Function) {
-        fs.mkdirSync(uploadPathChunks, { recursive: true }) // TODO: Convert to S3
-        cb(null, uploadPathChunks);
+        FileSystemActionType.createDir(FileSystemPathType.uploadPathChunks, { recursive: true }); // TODO: Convert to S3
+        cb(null, FileSystemPathType.uploadPathChunks);
     },
     filename: function (req, file, cb: Function) {
         /**
@@ -40,7 +42,7 @@ const storage = multer.diskStorage({
                 console.error('multer.filename error:', error);
             });
     }
-});
+}) : new AWSS3CustomStorageEngine({});
 
 export const upload = multer({
     limits: { fileSize: 3 * 1024 * 1024 * 1024 }, // 2GiB limit

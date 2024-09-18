@@ -4,7 +4,7 @@ import fs from 'fs';
 import { Low } from 'lowdb/lib';
 import path from 'path';
 import { exec } from 'child_process';
-import { uploadPath, uploadPathChunks, streamPath, LocalFileSystemPath } from 'service/fileSystem/localFileSystemPath';
+import { LocalFileSystemPath } from 'service/fileSystem/localFileSystemPath';
 
 
 export class VideoProcessUtils {
@@ -22,7 +22,7 @@ export class VideoProcessUtils {
     }
 
     public static async getAllInfos(): Promise<any[]> {
-        const videos = fs.readdirSync(uploadPath);
+        const videos = fs.readdirSync(LocalFileSystemPath.uploadPath);
         let videoInfos = [];
         for (let video of videos) {
             const info = {

@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
-import { streamPath } from 'service/fileSystem/localFileSystemPath';
-import { LocalFileSystemAction } from 'service/fileSystem/localFileSystemAction';
+import { FileSystemPathType, FileSystemActionType } from 'initFs';
 
 export const streamList = async (req: Request, res: Response) => {
     try {
-        const videos = LocalFileSystemAction.readFormDir(streamPath, undefined);
+        const videos = await FileSystemActionType.readFormDir(FileSystemPathType.streamPath, undefined);
         res.send({
             streamList: videos
         });

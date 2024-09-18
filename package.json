@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/hdthinh1012/aws-workshop-0-hls-streaming#readme",
   "devDependencies": {
-    "@aws-sdk/client-s3": "^3.637.0",
+    "@aws-sdk/client-s3": "^3.651.1",
     "@aws-sdk/client-secrets-manager": "^3.637.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
@@ -47,6 +47,8 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "@aws-sdk/s3-request-presigner": "^3.651.1",
+    "@smithy/node-http-handler": "^3.2.2",
     "@types/lowdb": "^1.0.15",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

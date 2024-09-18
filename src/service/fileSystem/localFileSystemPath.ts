@@ -4,35 +4,35 @@ import fs from 'fs';
 import { Low } from 'lowdb/lib';
 import path from 'path';
 import { exec } from 'child_process';
-abstract class AbstractFileSystemPath { }
 
-export const uploadPath = path.resolve('uploads/videos');
-export const uploadPathChunks = path.resolve('uploads/tmp');
-export const streamPath = path.resolve('streams');
+export abstract class AbstractFileSystemPath { }
 
-export class LocalFileSystemPath {
+export class LocalFileSystemPath extends AbstractFileSystemPath {
+    static uploadPath = path.resolve('uploads/videos');
+    static uploadPathChunks = path.resolve('uploads/tmp');
+    static streamPath = path.resolve('streams');
     public static uploadVideoDirectoryPath() {
-        return uploadPath;
+        return LocalFileSystemPath.uploadPath;
     }
 
     public static uploadChunkDirectoryPath() {
-        return uploadPathChunks;
+        return LocalFileSystemPath.uploadPathChunks;
     }
 
     public static streamDirectoryPath() {
-        return streamPath;
+        return LocalFileSystemPath.streamPath;
     }
 
     public static uploadVideoFilePath(videoName: string) {
-        return path.resolve(uploadPath, videoName);
+        return path.resolve(LocalFileSystemPath.uploadPath, videoName);
     }
 
     public static uploadChunkFilePath(chunkName: string) {
-        return path.resolve(uploadPathChunks, chunkName);
+        return path.resolve(LocalFileSystemPath.uploadPathChunks, chunkName);
     }
 
     public static streamVideoMasterPlaylistDirectoryPath(videoName: string) {
-        return path.resolve(streamPath, videoName);
+        return path.resolve(LocalFileSystemPath.streamPath, videoName);
     }
 
     public static getFileStatistic(filePath: string) {

@@ -1,11 +1,37 @@
 import { Request, Response } from 'express';
 import { Low } from 'lowdb/lib';
 
-import { LocalFileSystemPath, uploadPath, uploadPathChunks } from 'service/fileSystem/localFileSystemPath';
 import { UploadUtils } from 'service/video/uploadUtils';
 import { FilenameUtils } from 'service/video/filenameUtils';
 import { VideoProcessUtils } from 'service/video/videoProcessUtils';
-import { LocalFileSystemAction } from 'service/fileSystem/localFileSystemAction';
+import { FileSystemActionType, FileSystemPathType } from 'initFs';
+import { chunkSize } from 'service/multer/multer';
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+export const uploadSetup = async (req: Request, res: Response) => {
+    try {
+        const { baseFileName, fileSize } = req.body;
+        const chunkSum = Math.ceil(fileSize / chunkSize);
+
+        const dbModule = await import('service/database/lowdb');
+        const db: Low<{}> = await dbModule.default;
+        if (baseFileName in db.data) {
+            throw 'Filename exist!';
+        } else {
+            await db.update((data) => data[baseFileName] = new Array(chunkSum).fill(false));
+            res.send({
+                success: true,
+                chunkSum: chunkSum,
+                chunkSize: chunkSize
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(400).send({ error, success: false });
+    }
+}
 
 /**
  * This is run right after Multer process upcoming chunk and store into tmp directory
@@ -47,7 +73,9 @@ export const uploadChunk = async (req, res) => {
                      * True code
                      */
                     await UploadUtils.mergeChunks(db, fileName, undefined);
-                    VideoProcessUtils.generateMasterPlaylist(fileName);
+                    if (process.env.IS_AWS_S3 !== '1') {
+                        VideoProcessUtils.generateMasterPlaylist(fileName);
+                    }
                     /**
                      * Mock test response failed on last part to test cancelling upload
                      */
@@ -140,17 +168,17 @@ export const cleanAll = async (req: Request, res: Response) => {
                 delete data[key];
             }
         });
-        const chunks = LocalFileSystemAction.readFormDir(LocalFileSystemPath.uploadChunkDirectoryPath(), undefined);
+        const chunks = await FileSystemActionType.readFormDir(FileSystemPathType.uploadChunkDirectoryPath(), undefined);
         for (let chunk of chunks) {
-            LocalFileSystemAction.rmDirectory(LocalFileSystemPath.uploadChunkFilePath(chunk), {});
+            FileSystemActionType.rmDirectory(FileSystemPathType.uploadChunkFilePath(chunk), {});
         }
-        const uploadVideos = LocalFileSystemAction.readFormDir(LocalFileSystemPath.uploadVideoDirectoryPath(), undefined);
+        const uploadVideos = await FileSystemActionType.readFormDir(FileSystemPathType.uploadVideoDirectoryPath(), undefined);
         for (let video of uploadVideos) {
-            LocalFileSystemAction.rmDirectory(LocalFileSystemPath.uploadVideoFilePath(video), {});
+            FileSystemActionType.rmDirectory(FileSystemPathType.uploadVideoFilePath(video), {});
         }
-        const streamVideos = LocalFileSystemAction.readFormDir(LocalFileSystemPath.streamDirectoryPath(), undefined);
+        const streamVideos = await FileSystemActionType.readFormDir(FileSystemPathType.streamDirectoryPath(), undefined);
         for (let videoDir of streamVideos) {
-            LocalFileSystemAction.rmDirectory(LocalFileSystemPath.streamVideoMasterPlaylistDirectoryPath(videoDir), { recursive: true });
+            FileSystemActionType.rmDirectory(FileSystemPathType.streamVideoMasterPlaylistDirectoryPath(videoDir), { recursive: true });
         }
         res.send({
             success: true
