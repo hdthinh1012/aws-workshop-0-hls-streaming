@@ -9,7 +9,6 @@ import { fileSystemPathObject } from 'initFs';
 
 export class VideoProcessUtils {
     public static async generateMasterPlaylist(fileName: string): Promise<any> {
-        console.log('VideoProcessUtils.generateMasterPlaylist called');
         const uploadInfo = {
             url: `${process.env.SERVER_URL}/static/${fileName}`,
             bitrate: 0,
@@ -106,6 +105,7 @@ export class VideoProcessUtils {
         codec: string
     }) {
         try {
+            console.log('VideoProcessUtils.encodeHLS called');
             await new Promise((resolve, reject) => {
                 exec(`ffmpeg -y -i ${fileSystemPathObject.uploadVideoFileAbsolutePath(fileName)} \
 -loglevel error \
@@ -136,6 +136,7 @@ ${fileSystemPathObject.streamVideoMasterPlaylistDirectoryAbsolutePath(fileName)}
                     }
                 )
             });
+            console.log('VideoProcessUtils.encodeHLS finish successfully');
         } catch (error) {
             console.error('EncodeUtils.encodeHLS error:', error);
         }
