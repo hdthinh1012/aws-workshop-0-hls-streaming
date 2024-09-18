@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Low } from 'lowdb/lib';
 import dotenv from 'dotenv';
 dotenv.config();
-import { FileSystemPathType, FileSystemActionType } from 'initFs';
+import { fileSystemPathObject, fileSystemActionObject } from 'initFs';
 import { FilenameUtils } from 'service/video/filenameUtils';
 import { AWSS3CustomStorageEngine } from './awsS3CustomEngine';
 
@@ -14,8 +14,8 @@ export const chunkSize = 8 * 1024 * 1024; // 8MiB chunk size
  */
 const storage = (process.env.IS_AWS_S3 !== '1') ? multer.diskStorage({
     destination: function (req, file, cb: Function) {
-        FileSystemActionType.createDir(FileSystemPathType.uploadPathChunks, { recursive: true }); // TODO: Convert to S3
-        cb(null, FileSystemPathType.uploadPathChunks);
+        fileSystemActionObject.createDir(fileSystemPathObject.uploadChunkDirectoryPath(), { recursive: true }); // TODO: Convert to S3
+        cb(null, fileSystemPathObject.uploadChunkDirectoryPath());
     },
     filename: function (req, file, cb: Function) {
         /**

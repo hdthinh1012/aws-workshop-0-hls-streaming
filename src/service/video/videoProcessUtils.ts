@@ -4,11 +4,12 @@ import fs from 'fs';
 import { Low } from 'lowdb/lib';
 import path from 'path';
 import { exec } from 'child_process';
-import { LocalFileSystemPath } from 'service/fileSystem/localFileSystemPath';
+import { fileSystemPathObject } from 'initFs';
 
 
 export class VideoProcessUtils {
     public static async generateMasterPlaylist(fileName: string): Promise<any> {
+        console.log('VideoProcessUtils.generateMasterPlaylist called');
         const uploadInfo = {
             url: `${process.env.SERVER_URL}/static/${fileName}`,
             bitrate: 0,
@@ -22,7 +23,7 @@ export class VideoProcessUtils {
     }
 
     public static async getAllInfos(): Promise<any[]> {
-        const videos = fs.readdirSync(LocalFileSystemPath.uploadPath);
+        const videos = fs.readdirSync(fileSystemPathObject.uploadVideoDirectoryAbsolutePath());
         let videoInfos = [];
         for (let video of videos) {
             const info = {
@@ -42,7 +43,7 @@ export class VideoProcessUtils {
     static async isAudioStreamExist(fileName: string): Promise<boolean> {
         return new Promise<boolean>
             ((resolve, reject) => {
-                exec(`ffprobe -i ${LocalFileSystemPath.uploadVideoFilePath(fileName)} -v error -select_streams a:0 -show_entries stream=codec_type -of default=nw=1:nk=1`,
+                exec(`ffprobe -i ${fileSystemPathObject.uploadVideoFileAbsolutePath(fileName)} -v error -select_streams a:0 -show_entries stream=codec_type -of default=nw=1:nk=1`,
                     (err, stdout, stderr) => {
                         if (err) {
                             return reject(err);
@@ -57,7 +58,7 @@ export class VideoProcessUtils {
         return new Promise<number>
             ((resolve, reject) => {
                 exec(
-                    `ffprobe -v error -select_streams v:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 ${LocalFileSystemPath.uploadVideoFilePath(fileName)}`,
+                    `ffprobe -v error -select_streams v:0 -show_entries stream=bit_rate -of default=nw=1:nk=1 ${fileSystemPathObject.uploadVideoFileAbsolutePath(fileName)}`,
                     (err, stdout, stderr) => {
                         if (err) {
                             return reject(err)
@@ -72,7 +73,7 @@ export class VideoProcessUtils {
         return new Promise<string>
             ((resolve, reject) => {
                 exec(
-                    `ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of json ${LocalFileSystemPath.uploadVideoFilePath(fileName)}`,
+                    `ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of json ${fileSystemPathObject.uploadVideoFileAbsolutePath(fileName)}`,
                     (err, stdout, stderr) => {
                         if (err) {
                             return reject(err)
@@ -87,7 +88,7 @@ export class VideoProcessUtils {
     static async getCodec(fileName: string): Promise<string> {
         return new Promise<string>((resolve, reject) => {
             exec(
-                `ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 ${LocalFileSystemPath.uploadVideoFilePath(fileName)}`,
+                `ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 ${fileSystemPathObject.uploadVideoFileAbsolutePath(fileName)}`,
                 (err, stdout, stderr) => {
                     if (err) {
                         reject(err);
@@ -106,7 +107,7 @@ export class VideoProcessUtils {
     }) {
         try {
             await new Promise((resolve, reject) => {
-                exec(`ffmpeg -y -i ${LocalFileSystemPath.uploadVideoFilePath(fileName)} \
+                exec(`ffmpeg -y -i ${fileSystemPathObject.uploadVideoFileAbsolutePath(fileName)} \
 -loglevel error \
 -c:v libx264 -crf 22 -c:a aac -ar 44100 \
 -map 0:0 \
@@ -125,8 +126,8 @@ export class VideoProcessUtils {
 -preset slow -g 48 -sc_threshold 0 \
 -master_pl_name "master.m3u8" \
 -f hls -hls_time 5 -hls_list_size 0 \
--hls_segment_filename "${LocalFileSystemPath.streamVideoMasterPlaylistDirectoryPath(fileName)}/%v/fileSequence%d.ts" \
-${LocalFileSystemPath.streamVideoMasterPlaylistDirectoryPath(fileName)}/%v/prog_index.m3u8`,
+-hls_segment_filename "${fileSystemPathObject.streamVideoMasterPlaylistDirectoryAbsolutePath(fileName)}/%v/fileSequence%d.ts" \
+${fileSystemPathObject.streamVideoMasterPlaylistDirectoryAbsolutePath(fileName)}/%v/prog_index.m3u8`,
                     (err, stdout, stderr) => {
                         if (err) {
                             return reject(err);

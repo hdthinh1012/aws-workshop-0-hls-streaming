@@ -11,41 +11,31 @@ import {
     CompleteMultipartUploadCommand
 } from "@aws-sdk/client-s3";
 import { jsonSecret } from "service/fileSystem/awsS3Config";
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import fs from "fs";
 import { Writable, Readable } from "node:stream";
 
 import { AWSS3FileWriteStream } from "./awsS3FileWriteStream";
 import { AWSS3FileReadStream } from "./awsS3FileReadStream";
 
 export class AWSS3FileSystemAction extends AbstractFileSystemAction {
-    public static async readFormDir(path: string, options: { [key: string]: any } | undefined): Promise<string[]> {
+    public override async readFormDir(path: string, options: { [key: string]: any } | undefined): Promise<string[]> {
         try {
-            const listObjectRequest = new ListObjectsV2Command({
-                Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
-                Prefix: path,
-            });
-            const data = await s3.send(listObjectRequest);
-            const promiseUrls = data.Contents?.map(async (item: _Object) => {
-                const getObjectCommand = new GetObjectCommand({
-                    Bucket: jsonSecret.BUCKET_NAME,
-                    Key: item.Key,
-                    ResponseContentDisposition: "inline",
-                });
-                // const url = await getSignedUrl(s3, getObjectCommand, { expiresIn: 3600 });
-                return item.Key;
-                // return JSON.stringify({
-                //     url,
-                //     key: item.Key,
-                //     fileName: item.Key?.split("/")[1],
-                // });
-            });
-            return Promise.all(promiseUrls ?? []);
+            // const listObjectRequest = new ListObjectsV2Command({
+            //     Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
+            //     Prefix: path,
+            // });
+            // const data = await s3.send(listObjectRequest);
+            // const promiseUrls = data.Contents?.map(async (item: _Object) => {
+            //     return item.Key;
+            // });
+            // return Promise.all(promiseUrls ?? []);
+            return fs.readdirSync(path);
         } catch (error) {
             console.error('AWSS3FileSystemAction.readFormDir error:', error);
         }
     }
 
-    public static createDir(path, options: { [key: string | number | symbol]: any } | undefined): void {
+    public override createDir(path, options: { [key: string | number | symbol]: any } | undefined): void {
         try {
             /**
              * AWS using flat structure, no create directory command exist
@@ -55,7 +45,7 @@ export class AWSS3FileSystemAction extends AbstractFileSystemAction {
         }
     }
 
-    public static async rmDirectory(path: string, options: { [key: string | number | symbol]: any } | undefined): Promise<void> {
+    public override async rmDirectory(path: string, options: { [key: string | number | symbol]: any } | undefined): Promise<void> {
         try {
             let count = 0;
             let bucketName = jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "";
@@ -89,7 +79,7 @@ export class AWSS3FileSystemAction extends AbstractFileSystemAction {
                     continueToken = dataList.ContinuationToken;
                     continue;
                 } else {
-                    console.log(`${count} files deleted`);
+                    console.log(`AWSS3FileSystemAction.rmDirectory: ${count} files deleted`);
                     break;
                 }
             }
@@ -98,42 +88,45 @@ export class AWSS3FileSystemAction extends AbstractFileSystemAction {
         }
     }
 
-    public static async rmFile(path: string): Promise<void> {
+    public override async rmFile(path: string): Promise<void> {
         try {
             const deleteCommand = new DeleteObjectCommand({
                 Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
                 Key: path,
             });
-
             await s3.send(deleteCommand);
         } catch (error) {
             console.error('AWSS3FileSystemAction.rmFile error:', error);
         }
     }
 
-    public static createReadStream(path: string, options: any): Readable {
+    public override createReadStream(path: string, options: any): Readable {
         // return fs.createReadStream(path, options);
         return new AWSS3FileReadStream({ highWaterMark: 16 * 1024 * 1024, filePath: path });
     }
 
-    public static createWriteStream(path: string, options: any): Writable {
+    public override createWriteStream(path: string, options: any): Writable {
         // return fs.createWriteStream(path, options);
         return new AWSS3FileWriteStream({ highWaterMark: 16 * 1024 * 1024, filePath: path });
     }
 
-    public static pipeReadToWrite(readStream: Readable, writeStream: Writable, options: any) {
+    public override pipeReadToWrite(readStream: Readable, writeStream: Writable, options: any) {
         readStream.pipe(writeStream, options);
     }
 
-    public static addEventListenerReadStream(readStream: Readable, event: string, handler: (...args: any[]) => void) {
+    public override addEventListenerReadStream(readStream: Readable, event: string, handler: (...args: any[]) => void) {
         readStream.on(event, handler);
     }
 
-    public static writeChunkToWriteStream(writeStream: Writable, chunk: any, callback: any) {
+    public addEventListenerWriteStream(writeStream: Writable, event: string, handler: (...args: any[]) => void): void {
+        writeStream.on(event, handler);
+    }
+
+    public override writeChunkToWriteStream(writeStream: Writable, chunk: any, callback: any) {
         writeStream.write(chunk, callback);
     }
 
-    public static endWriteStream(writeStream: Writable) {
+    public override endWriteStream(writeStream: Writable) {
         writeStream.end();
     }
 }

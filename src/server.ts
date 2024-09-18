@@ -13,9 +13,9 @@ app.use(bodyParser.json()) // parse application/json
 app.use(bodyParser.text())
 app.use(bodyParser.raw())
 
-import { FileSystemPathType } from 'initFs';
-app.use('/static/hls', express.static(FileSystemPathType.streamPath));
-app.use('/static', express.static(FileSystemPathType.uploadPath));
+import { fileSystemPathObject } from 'initFs';
+app.use('/static/hls', express.static(fileSystemPathObject.streamDirectoryAbsolutePath()));
+app.use('/static', express.static(fileSystemPathObject.uploadVideoDirectoryAbsolutePath()));
 
 // Define a route
 app.use('/api', apiRouter);

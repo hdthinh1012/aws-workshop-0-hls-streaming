@@ -6,15 +6,15 @@ import { AbstractFileSystemPath, LocalFileSystemPath } from 'service/fileSystem/
 import { AWSS3FileSystemAction } from 'service/fileSystem/awsS3FileSystemAction';
 import { AWSS3FileSystemPath } from 'service/fileSystem/awsS3FileSystemPath';
 
-let FileSystemActionType;
-let FileSystemPathType;
+let fileSystemActionObject: AbstractFileSystemAction;
+let fileSystemPathObject: AbstractFileSystemPath;
 const isAWSS3 = process.env.IS_AWS_S3 === '1';
 if (isAWSS3) {
-    FileSystemActionType = AWSS3FileSystemAction;
-    FileSystemPathType = AWSS3FileSystemPath;
+    fileSystemActionObject = new AWSS3FileSystemAction();
+    fileSystemPathObject = new AWSS3FileSystemPath();
 } else {
-    FileSystemActionType = LocalFileSystemAction;
-    FileSystemPathType = LocalFileSystemPath;
+    fileSystemActionObject = new LocalFileSystemAction();
+    fileSystemPathObject = new LocalFileSystemPath();
 }
 
-export { FileSystemActionType, FileSystemPathType };
+export { fileSystemActionObject, fileSystemPathObject };

@@ -4,7 +4,7 @@ import { Low } from 'lowdb/lib';
 import { UploadUtils } from 'service/video/uploadUtils';
 import { FilenameUtils } from 'service/video/filenameUtils';
 import { VideoProcessUtils } from 'service/video/videoProcessUtils';
-import { FileSystemActionType, FileSystemPathType } from 'initFs';
+import { fileSystemActionObject, fileSystemPathObject } from 'initFs';
 import { chunkSize } from 'service/multer/multer';
 
 import dotenv from 'dotenv';
@@ -73,9 +73,7 @@ export const uploadChunk = async (req, res) => {
                      * True code
                      */
                     await UploadUtils.mergeChunks(db, fileName, undefined);
-                    if (process.env.IS_AWS_S3 !== '1') {
-                        VideoProcessUtils.generateMasterPlaylist(fileName);
-                    }
+                    VideoProcessUtils.generateMasterPlaylist(fileName);
                     /**
                      * Mock test response failed on last part to test cancelling upload
                      */
@@ -168,9 +166,9 @@ export const cleanAll = async (req: Request, res: Response) => {
                 delete data[key];
             }
         });
-        FileSystemActionType.rmDirectory(FileSystemPathType.uploadChunkDirectoryPath(), { recursive: true });
-        FileSystemActionType.rmDirectory(FileSystemPathType.uploadVideoDirectoryPath(), { recursive: true });
-        FileSystemActionType.rmDirectory(FileSystemPathType.streamDirectoryPath(), { recursive: true });
+        fileSystemActionObject.rmDirectory(fileSystemPathObject.uploadChunkDirectoryPath(), { recursive: true });
+        fileSystemActionObject.rmDirectory(fileSystemPathObject.uploadVideoDirectoryPath(), { recursive: true });
+        fileSystemActionObject.rmDirectory(fileSystemPathObject.streamDirectoryPath(), { recursive: true });
         res.send({
             success: true
         });

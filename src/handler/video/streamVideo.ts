@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import { FileSystemPathType, FileSystemActionType } from 'initFs';
+import { fileSystemPathObject, fileSystemActionObject } from 'initFs';
 
 export const streamList = async (req: Request, res: Response) => {
     try {
-        const videos = await FileSystemActionType.readFormDir(FileSystemPathType.streamPath, undefined);
+        const videos = await fileSystemActionObject.readFormDir(fileSystemPathObject.streamDirectoryAbsolutePath(), undefined);
+        console.log('fileSystemPathObject.streamDirectoryAbsolutePath()', fileSystemPathObject.streamDirectoryAbsolutePath());
         res.send({
             streamList: videos
         });
