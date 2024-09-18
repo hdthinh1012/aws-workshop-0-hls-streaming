@@ -31,8 +31,8 @@ export class AWSS3FileSystemAction extends AbstractFileSystemAction {
                     Key: item.Key,
                     ResponseContentDisposition: "inline",
                 });
-                const url = await getSignedUrl(s3, getObjectCommand, { expiresIn: 3600 });
-                return url;
+                // const url = await getSignedUrl(s3, getObjectCommand, { expiresIn: 3600 });
+                return item.Key;
                 // return JSON.stringify({
                 //     url,
                 //     key: item.Key,

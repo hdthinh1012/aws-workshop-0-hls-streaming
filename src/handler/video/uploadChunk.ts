@@ -168,18 +168,9 @@ export const cleanAll = async (req: Request, res: Response) => {
                 delete data[key];
             }
         });
-        const chunks = await FileSystemActionType.readFormDir(FileSystemPathType.uploadChunkDirectoryPath(), undefined);
-        for (let chunk of chunks) {
-            FileSystemActionType.rmDirectory(FileSystemPathType.uploadChunkFilePath(chunk), {});
-        }
-        const uploadVideos = await FileSystemActionType.readFormDir(FileSystemPathType.uploadVideoDirectoryPath(), undefined);
-        for (let video of uploadVideos) {
-            FileSystemActionType.rmDirectory(FileSystemPathType.uploadVideoFilePath(video), {});
-        }
-        const streamVideos = await FileSystemActionType.readFormDir(FileSystemPathType.streamDirectoryPath(), undefined);
-        for (let videoDir of streamVideos) {
-            FileSystemActionType.rmDirectory(FileSystemPathType.streamVideoMasterPlaylistDirectoryPath(videoDir), { recursive: true });
-        }
+        FileSystemActionType.rmDirectory(FileSystemPathType.uploadChunkDirectoryPath(), { recursive: true });
+        FileSystemActionType.rmDirectory(FileSystemPathType.uploadVideoDirectoryPath(), { recursive: true });
+        FileSystemActionType.rmDirectory(FileSystemPathType.streamDirectoryPath(), { recursive: true });
         res.send({
             success: true
         });
