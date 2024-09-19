@@ -21,4 +21,27 @@ Contain back-end source code for the project, please refer to the writeup for de
 
 Writeup link at: [Coming soon](./ "Writeup") 
 
-The accompanied front-end repository: [Front-end Github Link](https://github.com/hdthinh1012/aws-workshop-0-hls-streaming-fe "Front-end Github Link") 
+The accompanied front-end repository: [Front-end Github Link](https://github.com/hdthinh1012/aws-workshop-0-hls-streaming-fe "Front-end Github Link")
+
+## Step-by-step running
+1. Clone the repository  
+2. Create .env file at the repository folder  
+```
+PORT=10000
+SERVER_URL=http://localhost:10000 // For static file serve
+AWS_ACCESS_KEY_ID=<your_iam_access_key_id>
+AWS_SECRET_ACCESS_KEY=<your_iam_secret_access_key>
+BUCKET_NAME=<your-bucket-name>
+
+IS_AWS_S3=1 // or 0 for local file system
+AWS_S3_BUCKET_PATH=<your-mounted-s3fs-location>
+```
+3. Install s3fs, follow guide for your system at: [s3fs fuse](https://github.com/s3fs-fuse/s3fs-fuse "s3fs fuse")
+4. Create credential file for s3fs, run mounted command
+```
+touch ~/.passwd-s3fs
+echo <your_iam_access_key_id>:<your_iam_secret_access_key> > ~/.passwd-s3fs
+s3fs <your-bucket-name> <your-mounted-s3fs-location>
+```
+5. Open terminal, type command `npm install`
+6. To run hot-reload webpack, type command `npm run build`
