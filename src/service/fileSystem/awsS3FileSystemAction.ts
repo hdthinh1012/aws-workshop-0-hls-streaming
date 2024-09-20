@@ -37,11 +37,9 @@ export class AWSS3FileSystemAction extends AbstractFileSystemAction {
 
     public override createDir(path, options: { [key: string | number | symbol]: any } | undefined): void {
         try {
-            /**
-             * AWS using flat structure, no create directory command exist
-             */
+            fs.mkdirSync(path, options);
         } catch (error) {
-            console.error('LocalFileSystemAction.rmDirectory error:', error);
+            console.error('AWSS3FileSystemAction.rmDirectory error:', error);
         }
     }
 

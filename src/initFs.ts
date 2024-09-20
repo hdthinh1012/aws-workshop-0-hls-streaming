@@ -17,8 +17,8 @@ if (isAWSS3) {
     fileSystemPathObject = new LocalFileSystemPath();
 }
 
-fileSystemActionObject.createDir(fileSystemPathObject.streamDirectoryPath(), { recursive: true });
-fileSystemActionObject.createDir(fileSystemPathObject.uploadVideoDirectoryPath(), { recursive: true });
-fileSystemActionObject.createDir(fileSystemPathObject.uploadChunkDirectoryPath(), { recursive: true });
+fileSystemActionObject.createDir(fileSystemPathObject.streamDirectoryAbsolutePath(), { recursive: true });
+fileSystemActionObject.createDir(fileSystemPathObject.uploadVideoDirectoryAbsolutePath(), { recursive: true });
+fileSystemActionObject.createDir(fileSystemPathObject.uploadChunkDirectoryAbsolutePath(), { recursive: true });
 
 export { fileSystemActionObject, fileSystemPathObject };
