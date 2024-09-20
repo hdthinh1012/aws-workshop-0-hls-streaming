@@ -66,6 +66,15 @@ sudo chown -R ec2-user.ec2-user /usr/local/bin/ffmpeg/
 sudo ln -s /usr/local/bin/ffmpeg/bin/ffmpeg /usr/bin/ffmpeg
 sudo ln -s /usr/local/bin/ffmpeg/bin/ffprobe /usr/bin/ffprobe
 ```
-6. Install NVM & Node 18
-7. Open terminal, type command `npm install`
-8. To run hot-reload webpack, type command `npm run build`
+6. Setup swap to support ffmpeg command
+```
+sudo dd if=/dev/zero of=/swapfile bs=128M count=32
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo swapon -s
+sudo echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
+```
+7. Install NVM & Node 18
+8. Open terminal, type command `npm install`
+9. To run hot-reload webpack, type command `npm run build`
