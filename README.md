@@ -56,5 +56,16 @@ echo <your_iam_access_key_id>:<your_iam_secret_access_key> > ~/.passwd-s3fs
 chmod 0600 ~/.passwd-s3fs
 s3fs <your-bucket-name> <your-mounted-s3fs-location>
 ```
-5. Open terminal, type command `npm install`
-6. To run hot-reload webpack, type command `npm run build`
+5. Install FFMPEG for generating master playlist (on Amazon Linux 2023-x86_64)
+```
+sudo wget https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+sudo tar -xf ffmpeg-master-latest-linux64-gpl.tar.xz
+sudo mv ffmpeg-master-latest-linux64-gpl/ /usr/local/bin/ffmpeg/
+sudo rm ffmpeg-master-latest-linux64-gpl.tar.xz
+sudo chown -R ec2-user.ec2-user /usr/local/bin/ffmpeg/
+sudo ln -s /usr/local/bin/ffmpeg/bin/ffmpeg /usr/bin/ffmpeg
+sudo ln -s /usr/local/bin/ffmpeg/bin/ffprobe /usr/bin/ffprobe
+```
+6. Install NVM & Node 18
+7. Open terminal, type command `npm install`
+8. To run hot-reload webpack, type command `npm run build`
