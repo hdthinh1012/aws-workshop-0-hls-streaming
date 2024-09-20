@@ -37,10 +37,23 @@ IS_AWS_S3=1 // or 0 for local file system
 AWS_S3_BUCKET_PATH=<your-mounted-s3fs-location>
 ```
 3. Install s3fs, follow guide for your system at: [s3fs fuse](https://github.com/s3fs-fuse/s3fs-fuse "s3fs fuse")
+   - Especially for EC2 Amazon Linux 2023:
+   ```
+   sudo yum install automake fuse fuse-devel gcc-c++ git libcurl-devel libxml2-devel make openssl-devel -y
+
+   git clone https://github.com/s3fs-fuse/s3fs-fuse.git
+
+   cd  s3fs-fuse
+   ./autogen.sh 
+   ./configure --prefix=/usr --with-openssl
+   make
+   sudo make install
+   ```
 4. Create credential file for s3fs, run mounted command
 ```
 touch ~/.passwd-s3fs
 echo <your_iam_access_key_id>:<your_iam_secret_access_key> > ~/.passwd-s3fs
+chmod 0600 ~/.passwd-s3fs
 s3fs <your-bucket-name> <your-mounted-s3fs-location>
 ```
 5. Open terminal, type command `npm install`
