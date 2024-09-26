@@ -1,18 +1,13 @@
-import { AbstractFileSystemAction } from "./localFileSystemAction";
 import { s3 } from 'service/fileSystem/awsS3Config';
 import {
-    ListObjectsV2Command,
-    GetObjectCommand,
-    DeleteObjectCommand,
-    DeleteObjectsCommand,
     _Object,
     CreateMultipartUploadCommand,
     UploadPartCommand,
-    CompleteMultipartUploadCommand
+    CompleteMultipartUploadCommand,
+    DeleteObjectCommand
 } from "@aws-sdk/client-s3";
 import { jsonSecret } from "service/fileSystem/awsS3Config";
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Writable, Readable } from "node:stream";
+import { Writable } from "node:stream";
 
 export class AWSS3FileWriteStream extends Writable {
     highWaterMark: number;
@@ -153,12 +148,15 @@ export class AWSS3FileWriteStream extends Writable {
     }
 
     _destroy(error, callback) {
-        // console.log("Write Count:", this.writesCount);
-        // const deleteCommand = new DeleteObjectCommand({
-        //     Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
-        //     Key: this.filePath,
-        // })
-        // s3.send(deleteCommand).then((_) => callback(error)).catch((_) => callback(error));
-        callback();
+        console.log("Write Count:", this.writesCount);
+        if (error) {
+            const deleteCommand = new DeleteObjectCommand({
+                Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
+                Key: this.filePath,
+            })
+            s3.send(deleteCommand).then((_) => callback(error)).catch((_) => callback(error));
+        } else {
+            callback();
+        }
     }
 }

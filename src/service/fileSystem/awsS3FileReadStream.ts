@@ -1,14 +1,8 @@
 import { AbstractFileSystemAction } from "./localFileSystemAction";
 import { s3 } from 'service/fileSystem/awsS3Config';
 import {
-    ListObjectsV2Command,
     GetObjectCommand,
-    DeleteObjectCommand,
-    DeleteObjectsCommand,
     _Object,
-    CreateMultipartUploadCommand,
-    UploadPartCommand,
-    CompleteMultipartUploadCommand
 } from "@aws-sdk/client-s3";
 import { jsonSecret } from "service/fileSystem/awsS3Config";
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -44,6 +38,7 @@ export const isComplete = ({ end, length }) => end === length - 1;
 export class AWSS3FileReadStream extends Readable {
     filePath: string;
     highWaterMark: number;
+    chunks: Uint8Array = new Uint8Array();
     lastRange = { start: -1, end: -1, length: -1 };
     nextRange = { start: -1, end: -1, length: -1 };
 
@@ -55,6 +50,13 @@ export class AWSS3FileReadStream extends Readable {
     _construct(callback: (error?: Error | null) => void): void {
         console.log('AWS read stream _construct called');
         callback();
+    }
+
+    chunksConcat(newChunk: Uint8Array): void {
+        var mergedArray = new Uint8Array(this.chunks.byteLength + newChunk.byteLength);
+        mergedArray.set(this.chunks);
+        mergedArray.set(newChunk, this.chunks.byteLength);
+        this.chunks = mergedArray;
     }
 
     _read(size) {
@@ -77,8 +79,13 @@ export class AWSS3FileReadStream extends Readable {
             this.lastRange = contentRange;
             Body.transformToByteArray()
                 .then((chunk) => {
-                    console.log('read stream push chunk', chunk);
-                    this.push(chunk);
+                    this.chunksConcat(chunk);
+                    if (this.chunks.byteLength >= this.highWaterMark) {
+                        let uploadingChunk = this.chunks;
+                        this.chunks = new Uint8Array(0);
+                        console.log('read stream push chunk', uploadingChunk);
+                        this.push(uploadingChunk);
+                    }
                 })
                 .catch((error) => {
                     console.log('Body.transformToByteArray() error', error);
