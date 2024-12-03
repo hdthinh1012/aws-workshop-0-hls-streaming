@@ -30,7 +30,7 @@ interface CustomFileResult extends Partial<Express.Multer.File> {
     name: string;
 }
 
-export const multipartUploadPartSize = 5 * 1024 * 1024; // AWS UploadPartCommand set lower-bound size = 5MB
+export const multipartUploadPartSize = 5 * 1024 * 1024; // AWS UploadPartCommand set lower-bound size = 5MB (if the total file size > 5MB)
 
 export class AWSS3CustomStorageEngine implements multer.StorageEngine {
     private nameFn: nameFnType;
