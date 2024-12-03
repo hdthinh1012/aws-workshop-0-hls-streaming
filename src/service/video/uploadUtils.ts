@@ -16,7 +16,7 @@ export class UploadUtils {
          */
 
         const finalFilePath = fileSystemPathObject.uploadVideoFilePath(fileName);
-        const writeStream = fileSystemActionObject.createWriteStream(finalFilePath, { highWaterMark: 5 * 1024 * 1024 });
+        const writeStream = fileSystemActionObject.createWriteStream(finalFilePath, { highWaterMark: 1 * 1024 * 1024 });
         const uploadChunksState = db.data[fileName];
         const totalPart = chunkSum ?? uploadChunksState.length;
         for (let i = 0; i < totalPart; i++) {

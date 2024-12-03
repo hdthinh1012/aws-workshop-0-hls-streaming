@@ -7,7 +7,7 @@ import { fileSystemPathObject, fileSystemActionObject } from 'initFs';
 import { FilenameUtils } from 'service/video/filenameUtils';
 import { AWSS3CustomStorageEngine } from './awsS3CustomEngine';
 
-export const chunkSize = 8 * 1024 * 1024; // 8MiB chunk size
+export const chunkSize = 1 * 1024 * 1024; // 1MiB chunk size
 
 /**
  * Middleware

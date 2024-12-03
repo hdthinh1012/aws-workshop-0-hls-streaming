@@ -60,7 +60,7 @@ export class AWSS3FileReadStream extends Readable {
     }
 
     _read(size) {
-        console.log('[AWSS3FileReadStream._read(size)] want-to-read size: ', size);
+        console.log('[AWSS3FileReadStream._read] want-to-read size: ', size);
         if (isComplete(this.lastRange)) {
             this.push(null);
             return;
@@ -75,7 +75,7 @@ export class AWSS3FileReadStream extends Readable {
         }).then(({ ContentRange, Body }) => {
             const contentRange = getRangeAndLength(ContentRange);
 
-            console.log('[AWSS3FileReadStream._read(size)] actual read size', contentRange);
+            console.log('[AWSS3FileReadStream._read] actual read size', contentRange.end - contentRange.start);
             this.lastRange = contentRange;
             Body.transformToByteArray()
                 .then((chunk) => {
