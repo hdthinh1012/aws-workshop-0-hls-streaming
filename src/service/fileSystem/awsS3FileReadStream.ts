@@ -60,7 +60,7 @@ export class AWSS3FileReadStream extends Readable {
     }
 
     _read(size) {
-        console.log('AWS read stream _read called');
+        console.log('[AWSS3FileReadStream._read(size)] want-to-read size: ', size);
         if (isComplete(this.lastRange)) {
             this.push(null);
             return;
@@ -75,14 +75,13 @@ export class AWSS3FileReadStream extends Readable {
         }).then(({ ContentRange, Body }) => {
             const contentRange = getRangeAndLength(ContentRange);
 
-            console.log('_read contentRange', contentRange);
+            console.log('[AWSS3FileReadStream._read(size)] actual read size', contentRange);
             this.lastRange = contentRange;
             Body.transformToByteArray()
                 .then((chunk) => {
                     this.chunksConcat(chunk);
                     let uploadingChunk = this.chunks;
                     this.chunks = new Uint8Array(0);
-                    console.log('read stream push chunk', uploadingChunk);
                     this.push(uploadingChunk);
                 })
                 .catch((error) => {

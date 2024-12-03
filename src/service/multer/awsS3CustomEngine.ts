@@ -30,7 +30,7 @@ interface CustomFileResult extends Partial<Express.Multer.File> {
     name: string;
 }
 
-export const multipartUploadPartSize = 6 * 1024 * 1024;
+export const multipartUploadPartSize = 5 * 1024 * 1024; // AWS UploadPartCommand set lower-bound size = 5MB
 
 export class AWSS3CustomStorageEngine implements multer.StorageEngine {
     private nameFn: nameFnType;
@@ -69,11 +69,11 @@ export class AWSS3CustomStorageEngine implements multer.StorageEngine {
             chunkReadStream.on('end', async () => {
                 fileSize = tmpBuffer.byteLength;
                 try {
+                    console.log("******************************************************************************\n\nUpload chunk to server finish, start writing chunk to S3")
                     while (tmpBuffer.byteLength > 0) {
                         const cutBuffer = tmpBuffer.subarray(0, multipartUploadPartSize);
                         tmpBuffer = tmpBuffer.subarray(multipartUploadPartSize);
                         let partNumber = partNumberCnt + 1;
-                        console.log('Reading buffer length:', cutBuffer.byteLength);
                         const uploadResult = await s3.send(new UploadPartCommand({
                             Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
                             Key: chunkS3Path,
@@ -81,16 +81,14 @@ export class AWSS3CustomStorageEngine implements multer.StorageEngine {
                             Body: cutBuffer,
                             PartNumber: partNumber
                         }))
-                        console.log("Part", partNumber, "uploaded");
+                        console.log("Part", partNumber, " of the chunk, size: ", cutBuffer.length / (1024 * 1024), " MiB uploaded\n\n******************************************************************************");
                         uploadResults.push(uploadResult);
-                        console.log('Reading tmpBuffer done length:', tmpBuffer.byteLength);
                         partNumberCnt += 1;
                     }
                 } catch (error) {
                     console.error('UploadPartCommand error:', error);
                 }
 
-                console.log('Prepare complete upload command');
                 try {
                     const res = await s3.send(
                         new CompleteMultipartUploadCommand({

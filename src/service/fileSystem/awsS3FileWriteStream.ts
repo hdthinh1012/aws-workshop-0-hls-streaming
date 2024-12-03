@@ -29,15 +29,12 @@ export class AWSS3FileWriteStream extends Writable {
      * This is useful to initialize state or asynchronously initialize resources before the stream can be used.
      */
     _construct(callback: (error?: Error | null) => void): void {
-        console.log('AWS S3 write stream _construct called');
         s3.send(
             new CreateMultipartUploadCommand({
                 Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
                 Key: this.filePath,
             }),
         ).then((multipartUpload) => {
-            console.log('AWS S3 write stream _construct called');
-            console.log('CreateMultipartUploadCommand success uploadId:', multipartUpload.UploadId);
             this.uploadId = multipartUpload.UploadId;
             callback();
         }).catch((err) => {
@@ -53,17 +50,15 @@ export class AWSS3FileWriteStream extends Writable {
     }
 
     _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
-        console.log('AWS S3 write stream _write called chunk:', chunk);
         // chunk = Uint8Array.from(chunk);
         this.chunksConcat(chunk);
         if (this.chunks.byteLength >= this.highWaterMark) {
+            console.log("[AWSS3FileWriteStream._write] write stream buffer's highWaterMark ", this.highWaterMark, " exceeded");
             this.writesCount += 1;
             let partNumber = this.writesCount;
             let uploadingChunk = this.chunks;
             this.chunks = new Uint8Array(0);
-            console.log('uploadingChunk', uploadingChunk);
-            console.log('uploadingChunk.byteLength:', uploadingChunk.byteLength);
-            console.log(`AWSWriteStream uploading part ${partNumber}, ${uploadingChunk.byteLength} bytes`);
+            console.log('[AWSS3FileWriteStream._write] prepare-to-write part ', partNumber, ' chunk length:', uploadingChunk.byteLength);
             this.uploadResultsPromise.push(
                 s3.send(new UploadPartCommand({
                     Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
@@ -72,8 +67,7 @@ export class AWSS3FileWriteStream extends Writable {
                     Body: uploadingChunk,
                     PartNumber: partNumber
                 })).then((uploadResult) => {
-                    console.log(`File ${this.filePath} write part number`, partNumber, "uploaded");
-                    console.log('Write stream uploadResult', uploadResult);
+                    console.log(`[AWSS3FileWriteStream._write] file ${this.filePath} write part number`, partNumber, "uploaded");
                     return uploadResult;
                 }).catch((err) => {
                     console.log('WriteStream UploadPartCommand error', err);
@@ -94,7 +88,7 @@ export class AWSS3FileWriteStream extends Writable {
             let partNumber = this.writesCount;
             let uploadingChunk = this.chunks;
             this.chunks = new Uint8Array(0);
-            console.log(`AWSWriteStream uploading last part ${partNumber}, ${uploadingChunk.byteLength} bytes`);
+            console.log(`[AWSS3FileWriteStream._final] AWSWriteStream uploading last part ${partNumber}, ${uploadingChunk.byteLength} bytes`);
             this.uploadResultsPromise.push(
                 s3.send(new UploadPartCommand({
                     Bucket: jsonSecret.BUCKET_NAME ? jsonSecret.BUCKET_NAME : "",
@@ -103,7 +97,7 @@ export class AWSS3FileWriteStream extends Writable {
                     Body: uploadingChunk,
                     PartNumber: this.writesCount
                 })).then((uploadResult) => {
-                    console.log(`File ${this.filePath} write part number`, partNumber, "uploaded");
+                    console.log(`[AWSS3FileWriteStream._final] File ${this.filePath} write part number`, partNumber, "uploaded");
                     return uploadResult;
                 }).catch((err) => {
                     console.log('WriteStream last part UploadPartCommand error', err);
@@ -111,7 +105,6 @@ export class AWSS3FileWriteStream extends Writable {
                 })
             );
         }
-        console.log('AWS S3 write stream _final called');
         Promise.all(this.uploadResultsPromise)
             .then((uploadResults) => {
                 console.log('CompleteMultipartUploadCommand config', {

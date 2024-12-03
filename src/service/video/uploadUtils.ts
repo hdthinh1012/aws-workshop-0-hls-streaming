@@ -16,7 +16,7 @@ export class UploadUtils {
          */
 
         const finalFilePath = fileSystemPathObject.uploadVideoFilePath(fileName);
-        const writeStream = fileSystemActionObject.createWriteStream(finalFilePath, undefined);
+        const writeStream = fileSystemActionObject.createWriteStream(finalFilePath, { highWaterMark: 5 * 1024 * 1024 });
         const uploadChunksState = db.data[fileName];
         const totalPart = chunkSum ?? uploadChunksState.length;
         for (let i = 0; i < totalPart; i++) {
@@ -26,7 +26,7 @@ export class UploadUtils {
             while (retries < MAX_RETRIES) {
                 try {
                     const chunkPath = fileSystemPathObject.uploadChunkFilePath(chunkName);
-                    const readStream = fileSystemActionObject.createReadStream(chunkPath, { highWaterMark: 16 * 1024 * 1024 });
+                    const readStream = fileSystemActionObject.createReadStream(chunkPath, { highWaterMark: 5 * 1024 * 1024 });
                     await new Promise<void>((resolve, reject) => {
                         fileSystemActionObject.addEventListenerReadStream(readStream, 'end', () => {
                             console.log('Write chunk end');
@@ -78,7 +78,7 @@ export class UploadUtils {
                 console.log('Reading chunk offset, length:', chunk.byteLength, chunk.byteLength);
                 const chunkFileName = `${fileName}.part_${chunkIndex}`;
                 const chunkFilePath = fileSystemPathObject.uploadChunkFilePath(chunkFileName);
-                const writeStream = fileSystemActionObject.createWriteStream(chunkFilePath, undefined);
+                const writeStream = fileSystemActionObject.createWriteStream(chunkFilePath, { highWaterMark: 5 * 1024 * 1024 });
                 fileSystemActionObject.writeChunkToWriteStream(writeStream, chunk, () => {
                     fileSystemActionObject.endWriteStream(writeStream);
                 })

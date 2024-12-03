@@ -100,12 +100,12 @@ export class AWSS3FileSystemAction extends AbstractFileSystemAction {
 
     public override createReadStream(path: string, options: any): Readable {
         // return fs.createReadStream(path, options);
-        return new AWSS3FileReadStream({ highWaterMark: 16 * 1024 * 1024, filePath: path });
+        return new AWSS3FileReadStream({ highWaterMark: options.highWaterMark ?? 16 * 1024 * 1024, filePath: path });
     }
 
     public override createWriteStream(path: string, options: any): Writable {
         // return fs.createWriteStream(path, options);
-        return new AWSS3FileWriteStream({ highWaterMark: 16 * 1024 * 1024, filePath: path });
+        return new AWSS3FileWriteStream({ highWaterMark: options.highWaterMark ?? 16 * 1024 * 1024, filePath: path });
     }
 
     public override pipeReadToWrite(readStream: Readable, writeStream: Writable, options: any) {
